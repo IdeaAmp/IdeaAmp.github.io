@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具選單</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .tool-menu {
+            background-color: #34495e;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .tool-menu button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .tool-menu button:hover {
+            background-color: #2980b9;
+        }
+
+        .tool-menu button.active {
+            background-color: #e74c3c;
+        }
+
+        .tool-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .tool-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-row input, .form-row select {
+            flex: 1;
+        }
+
+        .form-row span {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .calc-button {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .calc-button:hover {
+            background-color: #219a52;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+
+        .result h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result-item {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .result-item strong {
+            color: #e74c3c;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .timecode-display {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #e74c3c;
+            background-color: #ecf0f1;
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .bpm-result {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .tool-menu button {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>工具選單</h1>
+        </div>
+
+        <div class="tool-menu">
+            <button class="active" onclick="showTool('timecode')">時間碼計算器</button>
+            <button onclick="showTool('fade')">Fade 計算器</button>
+            <button onclick="showTool('beat')">拍數加減時間</button>
+            <button onclick="showTool('bpm')">BPM時值計算器</button>
+        </div>
+
+        <!-- 時間碼計算器 -->
+        <div id="timecode" class="tool-content active">
+            <h2>時間碼計算器</h2>
+            
+            <div class="form-group">
+                <label>FPS</label>
+                <select id="fps">
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                    <option value="29.97">29.97</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>時間碼 A</label>
+                <div class="form-row">
+                    <input type="number" id="tcA_h" placeholder="時" min="0" max="23" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcA_m" placeholder="分" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcA_s" placeholder="秒" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcA_f" placeholder="幀" min="0" max="29" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>時間碼 B</label>
+                <div class="form-row">
+                    <input type="number" id="tcB_h" placeholder="時" min="0" max="23" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcB_m" placeholder="分" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcB_s" placeholder="秒" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="tcB_f" placeholder="幀" min="0" max="29" value="0">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="calc-button" onclick="calculateTimecode()">計算</button>
+            </div>
+
+            <div id="timecode-result" class="result" style="display: none;">
+                <h3>計算結果</h3>
+                <div class="result-item">加法 (A + B): <span class="timecode-display" id="tc-add">00:00:00:00</span></div>
+                <div class="result-item">減法 (A - B): <span class="timecode-display" id="tc-sub">00:00:00:00</span></div>
+                <div class="result-item">時長 |A - B|: <span class="timecode-display" id="tc-diff">00:00:00:00</span></div>
+            </div>
+        </div>
+
+        <!-- Fade 計算器 -->
+        <div id="fade" class="tool-content">
+            <h2>Fade 計算器</h2>
+            
+            <div class="form-group">
+                <label>原始起始時間碼</label>
+                <div class="form-row">
+                    <input type="number" id="fade_h" placeholder="時" min="0" max="23" value="0">
+                    <span>:</span>
+                    <input type="number" id="fade_m" placeholder="分" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="fade_s" placeholder="秒" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="fade_f" placeholder="幀" min="0" max="29" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tempo (BPM)</label>
+                <input type="number" id="fade_bpm" placeholder="例如: 120" min="1" max="300" value="120">
+            </div>
+
+            <div class="form-group">
+                <label>拍號</label>
+                <select id="fade_signature">
+                    <option value="4/4">4/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="2/4">2/4</option>
+                    <option value="6/8">6/8</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>單位</label>
+                <div class="form-row">
+                    <select id="fade_unit">
+                        <option value="bar">小節</option>
+                        <option value="beat">拍數</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>數量</label>
+                <input type="number" id="fade_amount" placeholder="輸入數量" min="0" step="0.1" value="1">
+            </div>
+
+            <div class="button-group">
+                <button class="calc-button" onclick="calculateFade('in')">Fade In</button>
+                <button class="calc-button" onclick="calculateFade('out')">Fade Out</button>
+            </div>
+
+            <div id="fade-result" class="result" style="display: none;">
+                <h3>Fade 結果</h3>
+                <div id="fade-result-content"></div>
+            </div>
+        </div>
+
+        <!-- 拍數加減時間 -->
+        <div id="beat" class="tool-content">
+            <h2>拍數加減時間</h2>
+            
+            <div class="form-group">
+                <label>時間碼</label>
+                <div class="form-row">
+                    <input type="number" id="beat_h" placeholder="時" min="0" max="23" value="0">
+                    <span>:</span>
+                    <input type="number" id="beat_m" placeholder="分" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="beat_s" placeholder="秒" min="0" max="59" value="0">
+                    <span>:</span>
+                    <input type="number" id="beat_f" placeholder="幀" min="0" max="29" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>BPM</label>
+                <input type="number" id="beat_bpm" placeholder="例如: 120" min="1" max="300" value="120">
+            </div>
+
+            <div class="form-group">
+                <label>拍數</label>
+                <input type="number" id="beat_count" placeholder="輸入拍數" step="0.1" value="1">
+            </div>
+
+            <div class="form-group">
+                <label>操作</label>
+                <div class="form-row">
+                    <select id="beat_operation">
+                        <option value="add">加</option>
+                        <option value="sub">減</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="calc-button" onclick="calculateBeat()">計算</button>
+            </div>
+
+            <div id="beat-result" class="result" style="display: none;">
+                <h3>計算結果</h3>
+                <div id="beat-result-content"></div>
+            </div>
+        </div>
+
+        <!-- BPM時值計算器 -->
+        <div id="bpm" class="tool-content">
+            <h2>BPM時值計算器</h2>
+            
+            
+<div class="form-group" style="text-align: center;">
+    <button id="tapTempoButton" style="font-size: 24px; padding: 20px 40px; border-radius: 8px; background-color: #e67e22; color: white; border: none; cursor: pointer;">
+        Tap 節奏 (點擊以偵測BPM)
+    </button>
+    <div class="bpm-result" id="tapBPMResult">-- BPM</div>
+</div>
+
+            <div class="form-group">
+                <label>BPM (每分鐘節拍數)</label>
+                <input type="number" id="bpm_value" min="1" max="300" value="120" placeholder="例如: 120">
+            </div>
+
+            <div class="form-group">
+                <label>拍號</label>
+                <div class="form-row">
+                    <input type="number" id="bpm_numerator" min="1" max="32" value="4" placeholder="4">
+                    <span>/</span>
+                    <input type="number" id="bpm_denominator" min="1" max="32" value="4" placeholder="4">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>音符類型</label>
+                <select id="bpm_note_type">
+                    <option value="1">全音符 (1/1)</option>
+                    <option value="2">二分音符 (1/2)</option>
+                    <option value="4" selected>四分音符 (1/4)</option>
+                    <option value="8">八分音符 (1/8)</option>
+                    <option value="16">十六分音符 (1/16)</option>
+                    <option value="32">三十二分音符 (1/32)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>音符修飾</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="bmp_dotted">
+                        附點音符 (×1.5)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="bmp_triplet">
+                        三連音 (÷3)
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="calc-button" onclick="calculateBPM()">計算時值</button>
+            </div>
+
+            <div id="bmp-result" class="result" style="display: none;">
+                <h3>音符時值</h3>
+                <div class="bmp-result" id="bmp-result-value">0ms</div>
+                <div id="bmp-result-detail"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            designed by YO Hsiangchu
+        </div>
+    </div>
+
+    <script>
+        let currentFPS = 25;
+
+        function showTool(toolName) {
+            // 隱藏所有工具內容
+            const contents = document.querySelectorAll('.tool-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 移除所有按鈕的active狀態
+            const buttons = document.querySelectorAll('.tool-menu button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // 顯示選中的工具
+            document.getElementById(toolName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function formatTimecode(frames, fps) {
+            const totalSeconds = frames / fps;
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const remainingFrames = Math.floor(frames % fps);
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${remainingFrames.toString().padStart(2, '0')}`;
+        }
+
+        function timecodeToFrames(h, m, s, f, fps) {
+            return (h * 3600 + m * 60 + s) * fps + f;
+        }
+
+        function calculateTimecode() {
+            const fps = parseFloat(document.getElementById('fps').value);
+            currentFPS = fps;
+            
+            const tcA_h = parseInt(document.getElementById('tcA_h').value) || 0;
+            const tcA_m = parseInt(document.getElementById('tcA_m').value) || 0;
+            const tcA_s = parseInt(document.getElementById('tcA_s').value) || 0;
+            const tcA_f = parseInt(document.getElementById('tcA_f').value) || 0;
+            
+            const tcB_h = parseInt(document.getElementById('tcB_h').value) || 0;
+            const tcB_m = parseInt(document.getElementById('tcB_m').value) || 0;
+            const tcB_s = parseInt(document.getElementById('tcB_s').value) || 0;
+            const tcB_f = parseInt(document.getElementById('tcB_f').value) || 0;
+            
+            const framesA = timecodeToFrames(tcA_h, tcA_m, tcA_s, tcA_f, fps);
+            const framesB = timecodeToFrames(tcB_h, tcB_m, tcB_s, tcB_f, fps);
+            
+            const addResult = framesA + framesB;
+            const subResult = framesA - framesB;
+            const diffResult = Math.abs(subResult);
+            
+            document.getElementById('tc-add').textContent = formatTimecode(addResult, fps);
+            document.getElementById('tc-sub').textContent = formatTimecode(subResult, fps);
+            document.getElementById('tc-diff').textContent = formatTimecode(diffResult, fps);
+            
+            document.getElementById('timecode-result').style.display = 'block';
+        }
+
+        function calculateFade(type) {
+            const startH = parseInt(document.getElementById('fade_h').value) || 0;
+            const startM = parseInt(document.getElementById('fade_m').value) || 0;
+            const startS = parseInt(document.getElementById('fade_s').value) || 0;
+            const startF = parseInt(document.getElementById('fade_f').value) || 0;
+            
+            const bpm = parseFloat(document.getElementById('fade_bpm').value) || 120;
+            const signature = document.getElementById('fade_signature').value;
+            const unit = document.getElementById('fade_unit').value;
+            const amount = parseFloat(document.getElementById('fade_amount').value) || 1;
+            
+            const [numerator, denominator] = signature.split('/').map(Number);
+            const beatsPerBar = numerator;
+            
+            let totalBeats;
+            if (unit === 'bar') {
+                totalBeats = amount * beatsPerBar;
+            } else {
+                totalBeats = amount;
+            }
+            
+            const beatDuration = 60 / bpm; // 每拍秒數
+            const totalSeconds = totalBeats * beatDuration;
+            const additionalFrames = Math.round(totalSeconds * currentFPS);
+            
+            const startFrames = timecodeToFrames(startH, startM, startS, startF, currentFPS);
+            
+            let resultFrames;
+            if (type === 'in') {
+                resultFrames = startFrames + additionalFrames;
+            } else {
+                resultFrames = startFrames - additionalFrames;
+            }
+            
+            const resultTimecode = formatTimecode(resultFrames, currentFPS);
+            const fadeType = type === 'in' ? 'Fade In' : 'Fade Out';
+            
+            document.getElementById('fade-result-content').innerHTML = `
+                <div class="result-item">${fadeType} 結果: <span class="timecode-display">${resultTimecode}</span></div>
+                <div class="result-item">時長: ${totalSeconds.toFixed(2)} 秒 (${totalBeats} 拍)</div>
+            `;
+            
+            document.getElementById('fade-result').style.display = 'block';
+        }
+
+        function calculateBeat() {
+            const startH = parseInt(document.getElementById('beat_h').value) || 0;
+            const startM = parseInt(document.getElementById('beat_m').value) || 0;
+            const startS = parseInt(document.getElementById('beat_s').value) || 0;
+            const startF = parseInt(document.getElementById('beat_f').value) || 0;
+            
+            const bpm = parseFloat(document.getElementById('beat_bpm').value) || 120;
+            const beatCount = parseFloat(document.getElementById('beat_count').value) || 1;
+            const operation = document.getElementById('beat_operation').value;
+            
+            const beatDuration = 60 / bpm; // 每拍秒數
+            const totalSeconds = beatCount * beatDuration;
+            const additionalFrames = Math.round(totalSeconds * currentFPS);
+            
+            const startFrames = timecodeToFrames(startH, startM, startS, startF, currentFPS);
+            
+            let resultFrames;
+            if (operation === 'add') {
+                resultFrames = startFrames + additionalFrames;
+            } else {
+                resultFrames = startFrames - additionalFrames;
+            }
+            
+            const resultTimecode = formatTimecode(resultFrames, currentFPS);
+            const operationText = operation === 'add' ? '加' : '減';
+            
+            document.getElementById('beat-result-content').innerHTML = `
+                <div class="result-item">結果: <span class="timecode-display">${resultTimecode}</span></div>
+                <div class="result-item">操作: ${operationText} ${beatCount} 拍 (${totalSeconds.toFixed(2)} 秒)</div>
+            `;
+            
+            document.getElementById('beat-result').style.display = 'block';
+        }
+
+        function calculateBPM() {
+            const bpm = parseFloat(document.getElementById('bpm_value').value);
+            const numerator = parseInt(document.getElementById('bpm_numerator').value);
+            const denominator = parseInt(document.getElementById('bpm_denominator').value);
+            const noteType = parseInt(document.getElementById('bpm_note_type').value);
+            const isDotted = document.getElementById('bmp_dotted').checked;
+            const isTriplet = document.getElementById('bmp_triplet').checked;
+
+            if (!bpm || bpm <= 0) {
+                alert('請輸入有效的BPM值');
+                return;
+            }
+
+            // 計算一個四分音符的時值 (毫秒)
+            const quarterNoteDuration = 60000 / bpm;
+
+            // 計算拍號影響 (相對於4/4拍)
+            const timeSigMultiplier = (numerator / 4) * (4 / denominator);
+
+            // 計算基礎音符時值
+            let noteDuration = quarterNoteDuration * (4 / noteType) * timeSigMultiplier;
+
+            // 應用修飾符
+            if (isDotted) {
+                noteDuration *= 1.5;
+            }
+
+            if (isTriplet) {
+                noteDuration /= 3;
+            }
+
+            // 顯示結果
+            const noteTypeText = {
+                1: '全音符',
+                2: '二分音符',
+                4: '四分音符',
+                8: '八分音符',
+                16: '十六分音符',
+                32: '三十二分音符'
+            };
+
+            let description = `${numerator}/${denominator} 拍號下的`;
+            if (isDotted) description += '附點';
+            if (isTriplet) description += '三連音';
+            description += noteTypeText[noteType];
+
+            document.getElementById('bmp-result-value').textContent = Math.round(noteDuration) + 'ms';
+            document.getElementById('bmp-result-detail').innerHTML = `
+                <div class="result-item">音符: ${description}</div>
+                <div class="result-item">精確值: ${noteDuration.toFixed(2)}ms</div>
+            `;
+            
+            document.getElementById('bmp-result').style.display = 'block';
+        }
+
+        // 監聽BPM計算器輸入變化
+        document.getElementById('bpm_value').addEventListener('input', calculateBPM);
+        document.getElementById('bpm_numerator').addEventListener('input', calculateBPM);
+        document.getElementById('bpm_denominator').addEventListener('input', calculateBPM);
+        document.getElementById('bpm_note_type').addEventListener('change', calculateBPM);
+        document.getElementById('bmp_dotted').addEventListener('change', calculateBPM);
+        document.getElementById('bmp_triplet').addEventListener('change', calculateBPM);
+
+        // 初始化
+        document.getElementById('fps').addEventListener('change', function() {
+            currentFPS = parseFloat(this.value);
+        });
+    
+let tapTimes = [];
+
+document.getElementById('tapTempoButton').addEventListener('click', () => {
+    const now = Date.now();
+    tapTimes.push(now);
+
+    // Only keep the last 6 taps
+    if (tapTimes.length > 6) tapTimes.shift();
+
+    if (tapTimes.length >= 2) {
+        let intervals = [];
+        for (let i = 1; i < tapTimes.length; i++) {
+            intervals.push(tapTimes[i] - tapTimes[i - 1]);
+        }
+        const avgInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
+        const bpm = 60000 / avgInterval;
+        document.getElementById('tapBPMResult').textContent = bpm.toFixed(1) + ' BPM';
+        document.getElementById('bpm_value').value = Math.round(bpm);
+        calculateBPM();
+    }
+});
+
+</script>
+</body>
+</html>
